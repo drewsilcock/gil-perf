@@ -1,0 +1,29 @@
+[project]
+name = "gil-perf"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "Drew Silcock", email = "drew.silcock@stfc.ac.uk" }
+]
+dependencies = []
+readme = "README.md"
+requires-python = ">= 3.13"
+
+[tool.poetry]
+name = "gil-perf"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+numpy = "^2.1.1"
+matplotlib = "^3.9.2"
+typer = "^0.12.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

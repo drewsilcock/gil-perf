@@ -1,0 +1,32 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Basic",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/basic.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Multi-threaded",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/multi-threaded.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Basic",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/multi-process.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+  ]
+}
