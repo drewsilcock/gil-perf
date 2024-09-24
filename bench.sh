@@ -2,14 +2,6 @@
 
 set -euxo pipefail
 
-function setup-venv() {
-    export PYENV_VERSION=$1
-    python -m venv .venv-$PYENV_VERSION
-    source .venv-$PYENV_VERSION/bin/activate
-    poetry install
-    deactivate
-}
-
 function bench-script() {
     hyperfine \
         --warmup 2 \
@@ -33,12 +25,6 @@ function bench-script-cores() {
         "source .venv-3.13.0rc2t/bin/activate && python -X gil=1 -m gil_perf $1 $2 --num-chunks {num_chunks}"
 }
 
-
-python_versions=(3.12.6 3.13.0rc2 3.13.0rc2t)
-
-for python_version in "${python_versions[@]}"; do
-    setup-venv $python_version
-done
 
 mkdir -p exports
 

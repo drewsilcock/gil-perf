@@ -2,7 +2,6 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
-#     "pyqt6",
 #     "matplotlib",
 #     "numpy",
 # ]

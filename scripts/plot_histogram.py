@@ -3,7 +3,6 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "matplotlib",
-#     "pyqt6",
 #     "numpy",
 # ]
 # ///
@@ -15,6 +14,8 @@ import json
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+fontdict = {"family": "Geist"}
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("file", help="JSON file with benchmark results")
@@ -87,12 +88,13 @@ plt.legend(
     loc=args.legend_location,
     fancybox=True,
     shadow=True,
-    prop={"size": 10, "family": ["Source Code Pro", "Fira Mono", "Courier New"]},
+    fontdict=fontdict,
+    prop={"size": 10},
 )
 
-plt.xlabel("Time [s]")
+plt.xlabel("Time [s]", fontdict=fontdict)
 if args.title:
-    plt.title(args.title)
+    plt.title(args.title, fontdict=fontdict)
 
 if args.log_count:
     plt.yscale("log")

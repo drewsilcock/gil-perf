@@ -3,7 +3,6 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "matplotlib",
-#     "pyqt6",
 # ]
 # ///
 
@@ -19,6 +18,9 @@ import argparse
 import json
 
 import matplotlib.pyplot as plt
+from matplotlib import rc
+
+rc("font", family="Geist")
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("file", help="JSON file with benchmark results")
@@ -38,6 +40,7 @@ if args.labels:
     labels = args.labels.split(",")
 else:
     labels = [b["command"] for b in results]
+
 times = [b["times"] for b in results]
 
 if args.sort_by == "median":
@@ -56,10 +59,12 @@ for patch, color in zip(boxplot["boxes"], colors):
 
 if args.title:
     plt.title(args.title)
+
 plt.legend(handles=boxplot["boxes"], labels=labels, loc="best", fontsize="medium")
 plt.ylabel("Time [s]")
 plt.ylim(0, None)
-plt.xticks(list(range(1, len(labels) + 1)), labels, rotation=45)
+plt.xticks(list(range(1, len(labels) + 1)), labels, rotation=45, ha="right")
+
 if args.output:
     plt.savefig(args.output)
 else:

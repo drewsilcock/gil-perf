@@ -3,7 +3,6 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "matplotlib",
-#     "pyqt6",
 # ]
 # ///
 
@@ -19,28 +18,18 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("file", help="JSON file with benchmark results", nargs="+")
 parser.add_argument(
-    "--parameter-name",
-    metavar="name",
-    type=str,
-    help="Deprecated; parameter names are now inferred from benchmark files",
-)
-parser.add_argument(
     "--log-x", help="Use a logarithmic x (parameter) axis", action="store_true"
 )
 parser.add_argument(
     "--log-time", help="Use a logarithmic time axis", action="store_true"
 )
+parser.add_argument("--title", help="Title for plot")
 parser.add_argument(
-    "--titles", help="Comma-separated list of titles for the plot legend"
+    "--labels", help="Comma-separated list of labels for the plot legend"
 )
 parser.add_argument("-o", "--output", help="Save image to the given filename.")
 
 args = parser.parse_args()
-if args.parameter_name is not None:
-    sys.stderr.write(
-        "warning: --parameter-name is deprecated; names are inferred from "
-        "benchmark results\n"
-    )
 
 
 def die(msg):
@@ -103,8 +92,11 @@ else:
 if args.log_x:
     plt.xscale("log")
 
-if args.titles:
-    plt.legend(args.titles.split(","))
+if args.labels:
+    plt.legend(args.labels.split(","))
+
+if args.title:
+    plt.title(args.title)
 
 if args.output:
     plt.savefig(args.output)
