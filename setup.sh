@@ -23,7 +23,7 @@ done
 for python_version in "${python_versions[@]}"; do
     export PYENV_VERSION=$python_version
     python -m venv .venv-$PYENV_VERSION
-    source .venv-$PYENV_VERSION/bin/activate
+    . .venv-$PYENV_VERSION/bin/activate
     poetry install
     deactivate
 done

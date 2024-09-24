@@ -17,7 +17,7 @@ function plot-parameterised() {
         --output "exports/bench-cores-$1-$2.png"
 }
 
-source .venv-3.12.6/bin/activate
+. .venv-3.12.6/bin/activate
 
 plot-whisker mandelbrot single 'GIL Performance – Mandelbrot (single-threaded)'
 plot-whisker mandelbrot multi-threaded 'GIL Performance – Mandelbrot (multi-threaded)'
