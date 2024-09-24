@@ -25,7 +25,7 @@ class PerfMode(Enum):
 
 
 @app.command()
-def obrc(
+def main(
     script: PerfScript = Argument(
         default=..., help="Which performance assessment script to run."
     ),
@@ -42,19 +42,19 @@ def obrc(
         num_chunks = cpu_count() or 8
 
     match script:
-        case "obrc":
+        case PerfScript.obrc:
             match mode:
-                case "single":
+                case PerfMode.single:
                     obrc_single()
-                case "multi-process":
+                case PerfMode.multi_process:
                     obrc_multi_process(num_chunks)
-                case "multi-threaded":
+                case PerfMode.multi_threaded:
                     obrc_multi_threaded(num_chunks)
-        case "mandelbrot":
+        case PerfScript.mandelbrot:
             match mode:
-                case "single":
+                case PerfMode.single:
                     mandelbrot_single()
-                case "multi-process":
+                case PerfMode.multi_process:
                     mandelbrot_multi_process(num_chunks)
-                case "multi-threaded":
+                case PerfMode.multi_threaded:
                     mandelbrot_multi_threaded(num_chunks)

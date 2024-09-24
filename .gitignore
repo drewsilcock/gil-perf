@@ -1,3 +1,5 @@
+.python-version
+.vscode
 exports
 .venv-*
 

@@ -1,4 +1,5 @@
-from multiprocessing import Process
+from multiprocessing import Process, Array
+from multiprocessing.sharedctypes import SynchronizedArray
 from threading import Thread
 
 import numpy as np
@@ -46,13 +47,26 @@ def _converge_chunk(
             result[i, j] = _check_convergence(x, y)
 
 
+def _converge_shared_chunk(
+        x_values: np.ndarray,
+    y_values: np.ndarray,
+    x_indices: tuple[int, int],
+    y_indices: tuple[int, int],
+    result: SynchronizedArray,
+):
+    np_result = np.frombuffer(result.get_obj())
+    np_result = np_result.reshape((len(x_values), len(y_values)))
+    _converge_chunk(x_values, y_values, x_indices, y_indices, np_result)
+
+
 def mandelbrot_single():
     x_values, y_values, result = _generate_grid()
     _converge_chunk(x_values, y_values, (0, len(x_values)), (0, len(y_values)), result)
 
 
 def mandelbrot_multi_process(num_processes: int):
-    x_values, y_values, result = _generate_grid()
+    x_values, y_values, _ = _generate_grid()
+    result = Array("d", len(x_values) * len(y_values))
 
     # Just chunk the x values, there's no point splitting into a grid or anything.
     x_chunk_indices = chunk_indices(len(x_values), num_processes)
@@ -60,14 +74,23 @@ def mandelbrot_multi_process(num_processes: int):
     processes: list[Process] = []
     for i in range(num_processes):
         process = Process(
-            target=_converge_chunk,
-            args=(x_values, y_values, x_chunk_indices[i], (0, len(y_values)), result),
+            target=_converge_shared_chunk,
+            args=(
+                x_values,
+                y_values,
+                x_chunk_indices[i],
+                (0, len(y_values)),
+                result,
+            ),
         )
         process.start()
         processes.append(process)
 
     for process in processes:
         process.join()
+
+    np_result = np.frombuffer(result.get_obj())
+    np_result = np_result.reshape((len(x_values), len(y_values)))
 
 
 def mandelbrot_multi_threaded(num_threads: int):
