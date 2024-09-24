@@ -15,6 +15,8 @@ sudo apt update
 sudo apt install libjpeg8-dev zlib1g-dev libtiff-dev libfreetype6 libfreetype6-dev libwebp-dev libopenjp2-7-dev libopenjp2-7-dev -y
 ```
 
+You also need to install hyperfine as per [github.com/sharkdp/hyperfine](https://github.com/sharkdp/hyperfine?tab=readme-ov-file#installation).
+
 To installed the necessary tools and Python versions:
 
 ```bash
