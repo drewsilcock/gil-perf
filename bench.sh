@@ -91,7 +91,7 @@ function bench-scaling() {
 
 # Benchmarking takes ages to run, don't want to get rid of or overwrite old results.
 if [ -d exports ]; then
-    current_time=$(date "+%Y-%m-%d-%H-%M-%S")
+    current_time=$(date "+%Y-%m-%dT%H-%M-%S")
 
     info "Safely moving old exports to exports-$current_time"
     mv exports "exports-$current_time"

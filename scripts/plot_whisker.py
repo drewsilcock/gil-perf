@@ -54,12 +54,7 @@ def main(
         list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
     ],
     title: str | None = Option(default=None, help="Plot Title"),
-    # labels: str | None = Option(
-    #    default=None, help="Comma-separated list of entries for the plot legend"
-    # ),
-    output: Path | None = Option(
-        default=None, help="Save image to the given filename."
-    ),
+    output: list[Path] = Option(default=[], help="Save image to the given filename(s)."),
 ):
     rc("font", family="Geist")
 
@@ -86,8 +81,8 @@ def main(
     )
     grid.map(
         sns.boxplot,
-        x="runtime",
-        y="times",
+        "runtime",
+        "times",
         patch_artist=True,
         showfliers=False,
         gap=0.5,
@@ -102,8 +97,9 @@ def main(
     grid.set_titles("Mode = {col_name}")
 
     if output:
-        log.info("Saving plot...")
-        grid.figure.savefig(output)
+        for fname in output:
+            log.info("Saving plot to %s...", fname)
+            grid.figure.savefig(fname)
     else:
         log.info("Rendering plot...")
         plt.show()

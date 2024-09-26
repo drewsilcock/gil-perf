@@ -1,6 +1,11 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
+
+function info() {
+    printf '\E[34m'; printf "[Info] "; printf '\E[0m'; echo "$@"
+}
+
 
 run_names=(\
     '3-12-6' \
@@ -32,21 +37,27 @@ parallel_perf_modes=('multi-threaded' 'multi-process')
 perf_mode_shortnames=('s' 'mt' 'mp')
 parallel_perf_mode_shortnames=('mt' 'mp')
 
-input_dir='exports'
-output_dir='exports'
+input_dir='exports-2024-09-26T11-07-25'
+output_dir="$input_dir"
 
 function plot-comparison() {
+    info "Plotting comparison benchmarks"
+
     python scripts/plot_whisker.py \
         "$input_dir/bench-comparison.json" \
-        --title "GIL Performance Comparison" \
-        --output "$output_dir/bench-comparison.png"
+        --title "$1" \
+        --output "$output_dir/bench-comparison.png" \
+        --output "$output_dir/bench-comparison.svg"
 }
 
 function plot-scaling() {
+    info "Plotting scaling benchmarks"
+
     python scripts/plot_parameterised.py \
         $input_dir/bench-scaling-*.json \
-        --title "GIL Performance Scaling" \
-        --output "$output_dir/bench-scaling.png"
+        --title "$1" \
+        --output "$output_dir/bench-scaling.png" \
+        --output "$output_dir/bench-scaling.svg"
 }
 
 . .venv-3.12.6/bin/activate
@@ -54,10 +65,12 @@ function plot-scaling() {
 # If first argument is 'comparison', run 'plot-comparison', else if first arg is 'chunk-scan', run 'plot-chunk-scan', otherwise print help.
 case $1 in
     comparison)
-        plot-comparison 'GIL Performance Comparison'
+        title="${2:-GIL Performance Comparison}"
+        plot-comparison "$title"
         ;;
     scaling)
-        plot-scaling 'GIL Performance Scaling'
+        title="${2:-GIL Performance Scaling}"
+        plot-scaling "$title"
         ;;
     *)
         echo "Usage: $0 {comparison|scaling}"
