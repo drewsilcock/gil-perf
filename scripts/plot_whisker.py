@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# /// script
-# requires-python = ">=3.10"
-# dependencies = [
-#     "matplotlib",
-# ]
-# ///
-
 """This program shows `hyperfine` benchmark results as a box and whisker plot.
 
 Quoting from the matplotlib documentation:
@@ -14,58 +6,110 @@ Quoting from the matplotlib documentation:
     of the data. Flier points are those past the end of the whiskers.
 """
 
-import argparse
 import json
+from typing_extensions import Annotated
+from typing import Any
+from pathlib import Path
+import logging
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
+from typer import Typer, Option, Argument
+from rich.logging import RichHandler
+import seaborn as sns
+import pandas as pd
 
-rc("font", family="Geist")
+app = Typer()
 
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument("file", help="JSON file with benchmark results")
-parser.add_argument("--title", help="Plot Title")
-parser.add_argument("--sort-by", choices=["median"], help="Sort method")
-parser.add_argument(
-    "--labels", help="Comma-separated list of entries for the plot legend"
+FORMAT = "%(message)s"
+logging.basicConfig(
+    level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
 )
-parser.add_argument("-o", "--output", help="Save image to the given filename.")
+log = logging.getLogger("plot-parameterised")
 
-args = parser.parse_args()
 
-with open(args.file, encoding="utf-8") as f:
-    results = json.load(f)["results"]
+def parse_command(command: str) -> tuple[str, str]:
+    """
+    Parse command and return the Python runtime, the Python GIL config and the profile mode.
 
-if args.labels:
-    labels = args.labels.split(",")
-else:
-    labels = [b["command"] for b in results]
+    Examples:
+        Input: ". .venv-3.13.0rc2t/bin/activate && python -X gil=1 -m gil_perf mandelbrot multi-process"
+        Output: ("3.13.0rc2t-g1", "multi-process")
 
-times = [b["times"] for b in results]
+        Input: ". .venv-3.12.6/bin/activate && python  -m gil_perf mandelbrot single"
+        Output: ("3.12.6", "single")
+    """
+    parts = command.split(" ")
+    runtime = parts[1].split("-")[1].split("/")[0]
+    if "-X" in parts:
+        runtime += "-g" + parts[parts.index("-X") + 1].split("=")[1]
 
-if args.sort_by == "median":
-    medians = [b["median"] for b in results]
-    indices = sorted(range(len(labels)), key=lambda k: medians[k])
-    labels = [labels[i] for i in indices]
-    times = [times[i] for i in indices]
+    perf_mode = parts[-1]
+    return runtime, perf_mode
 
-plt.figure(figsize=(10, 6), constrained_layout=True)
-boxplot = plt.boxplot(times, vert=True, patch_artist=True)
-cmap = plt.get_cmap("rainbow")
-colors = [cmap(val / len(times)) for val in range(len(times))]
 
-for patch, color in zip(boxplot["boxes"], colors):
-    patch.set_facecolor(color)
+@app.command()
+def main(
+    file: Annotated[
+        list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
+    ],
+    title: str | None = Option(default=None, help="Plot Title"),
+    # labels: str | None = Option(
+    #    default=None, help="Comma-separated list of entries for the plot legend"
+    # ),
+    output: Path | None = Option(
+        default=None, help="Save image to the given filename."
+    ),
+):
+    rc("font", family="Geist")
 
-if args.title:
-    plt.title(args.title)
+    log.info("Loading results...")
+    results: list[dict[str, Any]] = []
+    for fname in file:
+        with open(fname, encoding="utf-8") as f:
+            results += list(json.load(f)["results"])
 
-plt.legend(handles=boxplot["boxes"], labels=labels, loc="best", fontsize="medium")
-plt.ylabel("Time [s]")
-plt.ylim(0, None)
-plt.xticks(list(range(1, len(labels) + 1)), labels, rotation=45, ha="right")
+    log.info("Processing results...")
 
-if args.output:
-    plt.savefig(args.output)
-else:
-    plt.show()
+    data = pd.DataFrame(columns=["runtime", "perf-mode", "times"])
+
+    for b in results:
+        runtime, perf_mode = parse_command(b["command"])
+        for time in b["times"]:
+            data.loc[len(data)] = [runtime, perf_mode, time]
+
+    log.info("Plotting...")
+
+    sns.set_theme(font="Geist", style="whitegrid")
+    grid = sns.FacetGrid(
+        data, col="perf-mode", hue="runtime", sharey=True, sharex=True, height=8
+    )
+    grid.map(
+        sns.boxplot,
+        x="runtime",
+        y="times",
+        patch_artist=True,
+        showfliers=False,
+        gap=0.5,
+    )
+
+    if title:
+        grid.figure.subplots_adjust(top=0.9)
+        grid.figure.suptitle(title)
+
+    grid.set_axis_labels("Python Runtime", "Time (s)")
+    grid.set(ylim=(0, None))
+    grid.set_titles("Mode = {col_name}")
+
+    if output:
+        log.info("Saving plot...")
+        grid.figure.savefig(output)
+    else:
+        log.info("Rendering plot...")
+        plt.show()
+
+    log.info("Done")
+
+
+if __name__ == "__main__":
+    app()

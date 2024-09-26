@@ -2,26 +2,58 @@
 
 set -euxo pipefail
 
+run_names=(\
+    '3-12-6' \
+    '3-13-0rc2' \
+    '3-13-0rc2t' \
+    '3-13-0rc2t-g0' \
+    '3-13-0rc2t-g1' \
+)
+
+python_versions=(\
+    3.12.6 \
+    3.13.0rc2 \
+    3.13.0rc2t \
+    3.13.0rc2t \
+    3.13.0rc2t \
+)
+
+python_args=(\
+    '' \
+    '' \
+    '' \
+    '-X gil=0' \
+    '-X gil=1' \
+)
+
+perf_script='mandelbrot'
+perf_modes=('single' 'multi-threaded' 'multi-process')
+parallel_perf_modes=('multi-threaded' 'multi-process')
+
+perf_mode_shortnames=('s' 'mt' 'mp')
+parallel_perf_mode_shortnames=('mt' 'mp')
+
+input_dir='exports'
+output_dir='exports'
+
 function plot-whisker() {
     python scripts/plot_whisker.py \
-        exports/bench-$1-$2.json \
-        --title "$3" \
-        --output "exports/bench-$1-$2.png" \
-        --labels '3.12,3.13,3.13 (ft GIL auto),3.13 (ft GIL disabled),3.13 (ft GIL enabled)'
+        "$input_dir/bench-$perf_script.json" \
+        --title "$1" \
+        --output "$output_dir/bench-$perf_script.png"
 }
 
 function plot-parameterised() {
     python scripts/plot_parameterised.py \
-        exports/bench-cores-$1-$2.json \
-        --title "$3" \
-        --output "exports/bench-cores-$1-$2.png"
+        $input_dir/bench-cores-$perf_script-*.json \
+        --title "$1" \
+        --output "$output_dir/bench-cores-$perf_script-$1.png"
 }
 
 . .venv-3.12.6/bin/activate
 
-plot-whisker mandelbrot single 'GIL Performance – Mandelbrot (single-threaded)'
-plot-whisker mandelbrot multi-threaded 'GIL Performance – Mandelbrot (multi-threaded)'
-plot-whisker mandelbrot multi-process 'GIL Performance – Mandelbrot (multi-process)'
+plot-whisker 'GIL Performance Comparison'
 
-plot-parameterised mandelbrot multi-threaded 'GIL Performance – Mandelbrot N# Chunks (multi-threaded)'
-plot-parameterised mandelbrot multi-process 'GIL Performance – Mandelbrot N# Chunks (multi-process)'
+#plot-parameterised multi-threaded 'GIL Performance – Mandelbrot N# Chunks (multi-threaded)'
+#plot-parameterised multi-process 'GIL Performance – Mandelbrot N# Chunks (multi-process)'
+

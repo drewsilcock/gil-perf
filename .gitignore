@@ -1,7 +1,9 @@
 .python-version
 .vscode
-exports
+exports*
 .venv-*
+
+.DS_Store
 
 # python generated files
 __pycache__/
