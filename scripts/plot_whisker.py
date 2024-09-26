@@ -11,6 +11,7 @@ from typing_extensions import Annotated
 from typing import Any
 from pathlib import Path
 import logging
+from enum import Enum
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -19,6 +20,8 @@ from rich.logging import RichHandler
 import seaborn as sns
 import pandas as pd
 
+DARK_BG = "#262626"
+
 app = Typer()
 
 FORMAT = "%(message)s"
@@ -26,6 +29,11 @@ logging.basicConfig(
     level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
 )
 log = logging.getLogger("plot-parameterised")
+
+
+class ColourMode(Enum):
+    dark = "dark"
+    light = "light"
 
 
 def parse_command(command: str) -> tuple[str, str]:
@@ -54,7 +62,12 @@ def main(
         list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
     ],
     title: str | None = Option(default=None, help="Plot Title"),
-    output: list[Path] = Option(default=[], help="Save image to the given filename(s)."),
+    output: list[Path] = Option(
+        default=[], help="Save image to the given filename(s)."
+    ),
+    colour_mode: ColourMode = Option(
+        default="light", help="Whether to use light or dark colour mode."
+    ),
 ):
     rc("font", family="Geist")
 
@@ -76,6 +89,10 @@ def main(
     log.info("Plotting...")
 
     sns.set_theme(font="Geist", style="whitegrid")
+
+    if colour_mode == ColourMode.dark:
+        plt.style.use("dark_background")
+
     grid = sns.FacetGrid(
         data, col="perf-mode", hue="runtime", sharey=True, sharex=True, height=8
     )
@@ -88,6 +105,14 @@ def main(
         gap=0.5,
     )
 
+    if colour_mode == ColourMode.dark:
+        grid.figure.set_facecolor(DARK_BG)
+        for ax in grid.figure.axes:
+            ax.set_facecolor(DARK_BG)
+
+    if colour_mode == ColourMode.dark:
+        plt.style.use("dark_background")
+
     if title:
         grid.figure.subplots_adjust(top=0.9)
         grid.figure.suptitle(title)
@@ -99,7 +124,10 @@ def main(
     if output:
         for fname in output:
             log.info("Saving plot to %s...", fname)
-            grid.figure.savefig(fname)
+            if colour_mode == ColourMode.dark:
+                grid.figure.savefig(fname, facecolor=DARK_BG)
+            else:
+                grid.figure.savefig(fname)
     else:
         log.info("Rendering plot...")
         plt.show()

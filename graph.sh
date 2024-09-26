@@ -37,17 +37,22 @@ parallel_perf_modes=('multi-threaded' 'multi-process')
 perf_mode_shortnames=('s' 'mt' 'mp')
 parallel_perf_mode_shortnames=('mt' 'mp')
 
-input_dir='exports-2024-09-26T11-07-25'
-output_dir="$input_dir"
-
 function plot-comparison() {
     info "Plotting comparison benchmarks"
 
     python scripts/plot_whisker.py \
         "$input_dir/bench-comparison.json" \
         --title "$1" \
-        --output "$output_dir/bench-comparison.png" \
-        --output "$output_dir/bench-comparison.svg"
+        --colour-mode light \
+        --output "$output_dir/bench-comparison-light.png" \
+        --output "$output_dir/bench-comparison-light.svg"
+
+    python scripts/plot_whisker.py \
+        "$input_dir/bench-comparison.json" \
+        --title "$1" \
+        --colour-mode dark \
+        --output "$output_dir/bench-comparison-dark.png" \
+        --output "$output_dir/bench-comparison-dark.svg"
 }
 
 function plot-scaling() {
@@ -56,8 +61,16 @@ function plot-scaling() {
     python scripts/plot_parameterised.py \
         $input_dir/bench-scaling-*.json \
         --title "$1" \
-        --output "$output_dir/bench-scaling.png" \
-        --output "$output_dir/bench-scaling.svg"
+        --colour-mode light \
+        --output "$output_dir/bench-scaling-light.png" \
+        --output "$output_dir/bench-scaling-light.svg"
+
+    python scripts/plot_parameterised.py \
+        $input_dir/bench-scaling-*.json \
+        --title "$1" \
+        --colour-mode dark \
+        --output "$output_dir/bench-scaling-dark.png" \
+        --output "$output_dir/bench-scaling-dark.svg"
 }
 
 . .venv-3.12.6/bin/activate
@@ -66,14 +79,20 @@ function plot-scaling() {
 case $1 in
     comparison)
         title="${2:-GIL Performance Comparison}"
+        input_dir="${3:-exports}"
+        output_dir="$input_dir"
+
         plot-comparison "$title"
         ;;
     scaling)
         title="${2:-GIL Performance Scaling}"
+        input_dir="${3:-exports}"
+        output_dir="$input_dir"
+
         plot-scaling "$title"
         ;;
     *)
-        echo "Usage: $0 {comparison|scaling}"
+        echo "Usage: $0 {comparison|scaling} [title] [exports_dir]"
         exit 1
         ;;
 esac
