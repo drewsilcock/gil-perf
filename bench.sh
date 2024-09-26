@@ -51,8 +51,8 @@ function bench-comparison() {
 
     info "Running ${#commands[@]} comparison benchmarks"
 
-    output_fname = "$output_dir/bench-comparison.json"
-    
+    output_fname="$output_dir/bench-comparison.json"
+
     # Eval is needed to combine the Python versions and arguments into a single string
     # containing multiple commands, each within quotes.
     eval hyperfine \

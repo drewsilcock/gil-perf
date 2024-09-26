@@ -17,7 +17,7 @@ sudo apt install libjpeg8-dev zlib1g-dev libtiff-dev libfreetype6 libfreetype6-d
 
 You also need to install hyperfine as per [github.com/sharkdp/hyperfine](https://github.com/sharkdp/hyperfine?tab=readme-ov-file#installation).
 
-To installed the necessary tools and Python versions:
+To installed the necessary Python versions and install the Python dependencies in separate venvs:
 
 ```bash
 ./setup.sh
@@ -27,7 +27,12 @@ This may take a few minutes.
 
 ### Running the benchmarks
 
-There are two different benchmarks to run, "comparison" which compares the execution time of the various runtimes and performance modes, and "scaling" which compares how the overall execution times changes as you increase the number of threads / processes. To run them:
+There are two different benchmarks to run:
+
+- "comparison" which compares the execution time of the various runtimes and performance modes, and
+- "scaling" which compares how the overall execution times changes as you increase the number of threads / processes.
+
+To run them:
 
 ```bash
 ./bench.sh comparison
@@ -42,3 +47,5 @@ The generate graphs from exported benchmarks:
 ./graph.sh comparison
 ./graph.sh scaling
 ```
+
+This will output the generated graphs to `exports/bench-comparison.{png,svg}` and `exports/bench-scaling.{png,svg}`.
