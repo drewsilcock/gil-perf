@@ -11,17 +11,15 @@ import logging
 import matplotlib.pyplot as plt
 from typer import Typer, Option, Argument
 from rich.logging import RichHandler
+import seaborn as sns
 
 app = Typer()
 
 FORMAT = "%(message)s"
 logging.basicConfig(
-    level=logging.WARNING, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+    level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
 )
 log = logging.getLogger("plot-parameterised")
-log.root.setLevel(logging.INFO)
-log.setLevel(logging.INFO)
-
 
 
 def die(msg):

@@ -26,7 +26,6 @@ python_args=(\
     '-X gil=1' \
 )
 
-perf_script='mandelbrot'
 perf_modes=('single' 'multi-threaded' 'multi-process')
 parallel_perf_modes=('multi-threaded' 'multi-process')
 
@@ -36,24 +35,33 @@ parallel_perf_mode_shortnames=('mt' 'mp')
 input_dir='exports'
 output_dir='exports'
 
-function plot-whisker() {
+function plot-comparison() {
     python scripts/plot_whisker.py \
-        "$input_dir/bench-$perf_script.json" \
-        --title "$1" \
-        --output "$output_dir/bench-$perf_script.png"
+        "$input_dir/bench-comparison.json" \
+        --title "GIL Performance Comparison" \
+        --output "$output_dir/bench-comparison.png"
 }
 
-function plot-parameterised() {
+function plot-scaling() {
     python scripts/plot_parameterised.py \
-        $input_dir/bench-cores-$perf_script-*.json \
-        --title "$1" \
-        --output "$output_dir/bench-cores-$perf_script-$1.png"
+        $input_dir/bench-scaling-*.json \
+        --title "GIL Performance Scaling" \
+        --output "$output_dir/bench-scaling.png"
 }
 
 . .venv-3.12.6/bin/activate
 
-plot-whisker 'GIL Performance Comparison'
-
-#plot-parameterised multi-threaded 'GIL Performance – Mandelbrot N# Chunks (multi-threaded)'
-#plot-parameterised multi-process 'GIL Performance – Mandelbrot N# Chunks (multi-process)'
+# If first argument is 'comparison', run 'plot-comparison', else if first arg is 'chunk-scan', run 'plot-chunk-scan', otherwise print help.
+case $1 in
+    comparison)
+        plot-comparison 'GIL Performance Comparison'
+        ;;
+    scaling)
+        plot-scaling 'GIL Performance Scaling'
+        ;;
+    *)
+        echo "Usage: $0 {comparison|scaling}"
+        exit 1
+        ;;
+esac
 

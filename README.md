@@ -27,10 +27,11 @@ This may take a few minutes.
 
 ### Running the benchmarks
 
-To run all the different benchmarks:
+There are two different benchmarks to run, "comparison" which compares the execution time of the various runtimes and performance modes, and "scaling" which compares how the overall execution times changes as you increase the number of threads / processes. To run them:
 
 ```bash
-./bench.sh
+./bench.sh comparison
+./bench.sh scaling
 ```
 
 ### Generating performance graphs
@@ -38,5 +39,6 @@ To run all the different benchmarks:
 The generate graphs from exported benchmarks:
 
 ```bash
-./graph.sh
+./graph.sh comparison
+./graph.sh scaling
 ```

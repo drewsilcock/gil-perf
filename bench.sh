@@ -1,6 +1,10 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
+
+function info() {
+    printf '\E[34m'; printf "[Info] "; printf '\E[0m'; echo "$@"
+}
 
 run_names=(\
     '3-12-6' \
@@ -27,15 +31,16 @@ perf_script='mandelbrot'
 perf_modes=('single' 'multi-threaded' 'multi-process')
 parallel_perf_modes=('multi-threaded' 'multi-process')
 
+output_dir='exports'
+
 function warm-imports() {
     . .venv-$1/bin/activate
     python -c "import gil_perf"
     deactivate
 }
 
-function bench-script() {
-    # Combine the Python versions and arguments into a single string containing multiple
-    # commands, each within quotes.
+# Runs 4x3 = 12 benchmarks with 10 runs and 1 warmup = 121 executions.
+function bench-comparison() {
     commands=()
     for i in "${!python_versions[@]}"; do
         for mode in "${perf_modes[@]}"; do
@@ -43,58 +48,75 @@ function bench-script() {
             commands+=("'$cmd'")
         done
     done
+
+    info "Running ${#commands[@]} comparison benchmarks"
+
+    output_fname = "$output_dir/bench-comparison.json"
     
+    # Eval is needed to combine the Python versions and arguments into a single string
+    # containing multiple commands, each within quotes.
     eval hyperfine \
         --warmup 1 \
-        --export-json exports/bench-$perf_script.json \
+        --export-json "$output_fname" \
         "${commands[@]}"
+
+    info "Exported results to $output_fname"
 }
 
-function bench-script-cores() {
+# Runs 4x2 = 8 benchmarks with 1-24 parameter scan and 1 warmup per benchmark = 200 executions.
+function bench-scaling() {
     commands=()
+    names=()
     for i in "${!python_versions[@]}"; do
         for mode in "${parallel_perf_modes[@]}"; do
             local cmd=". .venv-${python_versions[$i]}/bin/activate && python ${python_args[$i]} -m gil_perf $perf_script $mode"
             commands+=("'$cmd'")
+            names+=("${run_names[$i]}-$mode")
         done
     done
+
+    info "Running ${#commands[@]} scaling benchmarks"
     
-    for i in "${!commands[@]}"; do
-        cmd="${commands[$i]}"
-        name="${run_names[$i]}"
-        
-        eval hyperfine \
-            --warmup 1 \
-            --runs 4 \
-            --parameter-scan num_chunks 1 24 \
-            --export-json exports/bench-cores-$perf_script-$1-$name.json \
-            "$cmd"
-    done
+    output_fname="$output_dir/bench-scaling.json"
+
+    eval hyperfine \
+        --warmup 1 \
+        --runs 4 \
+        --parameter-scan num_chunks 1 24 \
+        --export-json $output_fname \
+        "${commands[@]}"
+
+    info "Exported results to $output_fname"
 }
 
 # Benchmarking takes ages to run, don't want to get rid of or overwrite old results.
 if [ -d exports ]; then
     current_time=$(date "+%Y-%m-%d-%H-%M-%S")
+
+    info "Safely moving old exports to exports-$current_time"
     mv exports "exports-$current_time"
 fi
 
 mkdir -p exports
 
+info "Warming up imports"
 for python_version in "${python_versions[@]}"; do
     warm-imports $python_version
 done
 
-# Runs 5x3 = 15 benchmarks and outputs to a single file to be used by the whisker
-# plotter.
-bench-script
+# If first argument is 'comparison', run the comparison benchmarks. If first argument is
+# 'chunk-scan', run the chunk scan benchmarks. Otherwise, show help message.
+case $1 in
+    comparison)
+        bench-comparison
+        ;;
+    scaling)
+        bench-scaling
+        ;;
+    *)
+        echo "Usage: $0 {comparison|scaling}"
+        exit 1
+        ;;
+esac
 
-# Runs 5x32 = 160 benchmarks and outputs to a separate file for each run.
-bench-script-cores multi-threaded
-
-# Runs another 5x32 = 160 benchmarks and outputs to a separate file for each run.
-bench-script-cores multi-process
-
-# Total n# benchmarks = 15 + 160 + 160 = 335
-# Single-threaded takes ~10 seconds, multi-threaded/process takes ~3 seconds so total
-# time is between 16 minutes and 55 minutes. In truth, 32-threaded GIL-enabled Python
-# takes much longer.
+info "Done"
