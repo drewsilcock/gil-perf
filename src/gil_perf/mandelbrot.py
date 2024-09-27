@@ -94,6 +94,7 @@ def mandelbrot_multi_process(num_processes: int):
 
 
 def mandelbrot_multi_threaded(num_threads: int):
+    print("Using %d threads", num_threads)
     x_values, y_values, result = _generate_grid()
 
     # Just chunk the x values, there's no point splitting into a grid or anything.

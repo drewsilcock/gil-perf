@@ -1,5 +1,6 @@
-from enum import Enum
 from os import cpu_count
+from pathlib import Path
+from typing_extensions import Annotated
 
 from typer import Typer, Option, Argument
 
@@ -9,23 +10,16 @@ from .mandelbrot import (
     mandelbrot_multi_process,
     mandelbrot_multi_threaded,
 )
+from .enums import PerfMode, PerfScript, ColourMode
+from .plotting import plot_whiskers, plot_parameterised
 
 app = Typer()
-
-
-class PerfScript(Enum):
-    obrc = "obrc"
-    mandelbrot = "mandelbrot"
-
-
-class PerfMode(Enum):
-    single = "single"
-    multi_process = "multi-process"
-    multi_threaded = "multi-threaded"
+plot_app = Typer(name="plot")
+app.add_typer(plot_app)
 
 
 @app.command()
-def main(
+def bench(
     script: PerfScript = Argument(
         default=..., help="Which performance assessment script to run."
     ),
@@ -58,3 +52,33 @@ def main(
                     mandelbrot_multi_process(num_chunks)
                 case PerfMode.multi_threaded:
                     mandelbrot_multi_threaded(num_chunks)
+
+
+@plot_app.command()
+def comparison(
+    file: Annotated[
+        list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
+    ],
+    title: str | None = Option(default=None, help="Title for plot."),
+    output: list[Path] = Option(
+        default=[], help="Save image to the given filename(s)."
+    ),
+    colour_mode: ColourMode = Option(
+        default="light", help="Whether to use light or dark colour mode."
+    ),
+):
+    plot_whiskers(file, title, output, colour_mode)
+
+
+@plot_app.command()
+def scaling(
+    file: Annotated[
+        list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
+    ],
+    title: str | None = Option(default=None, help="Title for plot."),
+    output: list[Path] = Option(default=[], help="Save image to the given filename(s)."),
+    colour_mode: ColourMode = Option(
+        default="light", help="Whether to use light or dark colour mode"
+    ),
+):
+    plot_parameterised(file, title, output, colour_mode)

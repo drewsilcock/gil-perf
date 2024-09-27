@@ -40,14 +40,14 @@ parallel_perf_mode_shortnames=('mt' 'mp')
 function plot-comparison() {
     info "Plotting comparison benchmarks"
 
-    python scripts/plot_whisker.py \
+    python -m gil_perf plot comparison \
         "$input_dir/bench-comparison.json" \
         --title "$1" \
         --colour-mode light \
         --output "$output_dir/bench-comparison-light.png" \
         --output "$output_dir/bench-comparison-light.svg"
 
-    python scripts/plot_whisker.py \
+    python -m gil_perf plot comparison \
         "$input_dir/bench-comparison.json" \
         --title "$1" \
         --colour-mode dark \
@@ -58,14 +58,14 @@ function plot-comparison() {
 function plot-scaling() {
     info "Plotting scaling benchmarks"
 
-    python scripts/plot_parameterised.py \
+    python -m gil_perf plot scaling \
         $input_dir/bench-scaling-*.json \
         --title "$1" \
         --colour-mode light \
         --output "$output_dir/bench-scaling-light.png" \
         --output "$output_dir/bench-scaling-light.svg"
 
-    python scripts/plot_parameterised.py \
+    python -m gil_perf plot scaling \
         $input_dir/bench-scaling-*.json \
         --title "$1" \
         --colour-mode dark \
