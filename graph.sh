@@ -7,36 +7,6 @@ function info() {
 }
 
 
-run_names=(\
-    '3-12-6' \
-    '3-13-0rc2' \
-    '3-13-0rc2t' \
-    '3-13-0rc2t-g0' \
-    '3-13-0rc2t-g1' \
-)
-
-python_versions=(\
-    3.12.6 \
-    3.13.0rc2 \
-    3.13.0rc2t \
-    3.13.0rc2t \
-    3.13.0rc2t \
-)
-
-python_args=(\
-    '' \
-    '' \
-    '' \
-    '-X gil=0' \
-    '-X gil=1' \
-)
-
-perf_modes=('single' 'multi-threaded' 'multi-process')
-parallel_perf_modes=('multi-threaded' 'multi-process')
-
-perf_mode_shortnames=('s' 'mt' 'mp')
-parallel_perf_mode_shortnames=('mt' 'mp')
-
 function plot-comparison() {
     info "Plotting comparison benchmarks"
 
@@ -59,14 +29,14 @@ function plot-scaling() {
     info "Plotting scaling benchmarks"
 
     python -m gil_perf plot scaling \
-        $input_dir/bench-scaling-*.json \
+        $input_dir/bench-scaling*.json \
         --title "$1" \
         --colour-mode light \
         --output "$output_dir/bench-scaling-light.png" \
         --output "$output_dir/bench-scaling-light.svg"
 
     python -m gil_perf plot scaling \
-        $input_dir/bench-scaling-*.json \
+        $input_dir/bench-scaling*.json \
         --title "$1" \
         --colour-mode dark \
         --output "$output_dir/bench-scaling-dark.png" \

@@ -19,10 +19,13 @@ def _parse_command(command: str) -> tuple[str, str]:
     Parse command and return the Python runtime, the Python GIL config and the profile mode.
 
     Examples:
-        Input: ". .venv-3.13.0rc2t/bin/activate && python -X gil=1 -m gil_perf mandelbrot multi-process"
+        Input: ". .venv-3.13.0rc2t/bin/activate && python -X gil=1 -m gil_perf bench mandelbrot multi-process"
         Output: ("3.13.0rc2t-g1", "multi-process")
 
-        Input: ". .venv-3.12.6/bin/activate && python  -m gil_perf mandelbrot single"
+        Input: ". .venv-3.12.6/bin/activate && python  -m gil_perf bench mandelbrot single"
+        Output: ("3.12.6", "single")
+
+        Input: ". .venv-3.12.6/bin/activate && python  -m gil_perf bench mandelbrot multi-process --num-chunks 8"
         Output: ("3.12.6", "single")
     """
     parts = command.split(" ")
@@ -30,7 +33,7 @@ def _parse_command(command: str) -> tuple[str, str]:
     if "-X" in parts:
         runtime += "-g" + parts[parts.index("-X") + 1].split("=")[1]
 
-    perf_mode = parts[-1]
+    perf_mode = parts[parts.index("bench") + 2]
     return runtime, perf_mode
 
 
@@ -118,10 +121,7 @@ def plot_parameterised(
     output: list[Path],
     colour_mode: ColourMode,
 ):
-    mean_times = pd.DataFrame(
-        columns=["runtime", "perf_mode", "num_chunks", "mean_time"]
-    )
-    all_times = pd.DataFrame(columns=["runtime", "perf_mode", "num_chunks", "time"])
+    data = pd.DataFrame(columns=["runtime", "perf_mode", "num_chunks", "time"])
 
     log.info("Loading results...")
     for i, fname in enumerate(file):
@@ -132,15 +132,8 @@ def plot_parameterised(
             runtime, perf_mode = _parse_command(b["command"])
             num_chunks = b["parameters"]["num_chunks"]
 
-            mean_times.loc[len(mean_times)] = [
-                runtime,
-                perf_mode,
-                num_chunks,
-                b["mean"],
-            ]
-
             for time in b["times"]:
-                all_times.loc[len(all_times)] = [runtime, perf_mode, num_chunks, time]
+                data.loc[len(data)] = [runtime, perf_mode, num_chunks, time]
 
     sns.set_theme(font="Geist", style="whitegrid")
 
@@ -148,7 +141,7 @@ def plot_parameterised(
         plt.style.use("dark_background")
 
     grid = sns.FacetGrid(
-        all_times, col="perf_mode", hue="runtime", sharey=True, sharex=True, height=8
+        data, col="perf_mode", hue="runtime", sharey=True, sharex=True, height=8
     )
     grid.map(sns.lineplot, "num_chunks", "time")
 

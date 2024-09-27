@@ -5,6 +5,7 @@ from threading import Thread
 import numpy as np
 
 from .common import chunk_indices
+from .logging import log
 
 
 MAX_ITER = 1000
@@ -94,7 +95,7 @@ def mandelbrot_multi_process(num_processes: int):
 
 
 def mandelbrot_multi_threaded(num_threads: int):
-    print("Using %d threads", num_threads)
+    log.info(f"Using {num_threads} threads")
     x_values, y_values, result = _generate_grid()
 
     # Just chunk the x values, there's no point splitting into a grid or anything.

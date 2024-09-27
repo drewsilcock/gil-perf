@@ -9,7 +9,7 @@ function info() {
 run_names=(\
     '3-12-6' \
     '3-13-0rc2' \
-    '3-13-0rc2t' \
+    '3-13-0rc2t-g0' \
     '3-13-0rc2t-g1' \
 )
 
@@ -23,7 +23,7 @@ python_versions=(\
 python_args=(\
     '' \
     '' \
-    '' \
+    '-X gil=0' \
     '-X gil=1' \
 )
 
