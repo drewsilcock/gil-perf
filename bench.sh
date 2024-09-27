@@ -44,7 +44,7 @@ function bench-comparison() {
     commands=()
     for i in "${!python_versions[@]}"; do
         for mode in "${perf_modes[@]}"; do
-            local cmd=". .venv-${python_versions[$i]}/bin/activate && python ${python_args[$i]} -m gil_perf $perf_script $mode"
+            local cmd=". .venv-${python_versions[$i]}/bin/activate && python ${python_args[$i]} -m gil_perf bench $perf_script $mode"
             commands+=("'$cmd'")
         done
     done
@@ -69,7 +69,7 @@ function bench-scaling() {
     names=()
     for i in "${!python_versions[@]}"; do
         for mode in "${parallel_perf_modes[@]}"; do
-            local cmd=". .venv-${python_versions[$i]}/bin/activate && python ${python_args[$i]} -m gil_perf $perf_script $mode --num-chunks {num_chunks}"
+            local cmd=". .venv-${python_versions[$i]}/bin/activate && python ${python_args[$i]} -m gil_perf bench $perf_script $mode --num-chunks {num_chunks}"
             commands+=("'$cmd'")
             names+=("${run_names[$i]}-$mode")
         done
