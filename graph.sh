@@ -13,16 +13,7 @@ function plot-comparison() {
     python -m gil_perf plot comparison \
         "$input_dir/bench-comparison.json" \
         --title "$1" \
-        --colour-mode light \
-        --output "$output_dir/bench-comparison-light.png" \
-        --output "$output_dir/bench-comparison-light.svg"
-
-    python -m gil_perf plot comparison \
-        "$input_dir/bench-comparison.json" \
-        --title "$1" \
-        --colour-mode dark \
-        --output "$output_dir/bench-comparison-dark.png" \
-        --output "$output_dir/bench-comparison-dark.svg"
+        --output-dir "$output_dir"
 }
 
 function plot-scaling() {
@@ -31,16 +22,7 @@ function plot-scaling() {
     python -m gil_perf plot scaling \
         $input_dir/bench-scaling*.json \
         --title "$1" \
-        --colour-mode light \
-        --output "$output_dir/bench-scaling-light.png" \
-        --output "$output_dir/bench-scaling-light.svg"
-
-    python -m gil_perf plot scaling \
-        $input_dir/bench-scaling*.json \
-        --title "$1" \
-        --colour-mode dark \
-        --output "$output_dir/bench-scaling-dark.png" \
-        --output "$output_dir/bench-scaling-dark.svg"
+        --output-dir "$output_dir"
 }
 
 . .venv-3.12.6/bin/activate

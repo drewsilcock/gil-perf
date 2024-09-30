@@ -11,7 +11,7 @@ from .mandelbrot import (
     mandelbrot_multi_threaded,
 )
 from .enums import PerfMode, PerfScript, ColourMode
-from .plotting import plot_whiskers, plot_parameterised
+from .plotting import plot_comparison, plot_scaling
 
 app = Typer()
 plot_app = Typer(name="plot")
@@ -60,14 +60,13 @@ def comparison(
         list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
     ],
     title: str | None = Option(default=None, help="Title for plot."),
-    output: list[Path] = Option(
-        default=[], help="Save image to the given filename(s)."
-    ),
-    colour_mode: ColourMode = Option(
-        default="light", help="Whether to use light or dark colour mode."
+    output_dir: Path | None = Option(
+        default=None,
+        help="Save images to this directory. If not specified, images will be displayed instead of saved to disk.",
     ),
 ):
-    plot_whiskers(file, title, output, colour_mode)
+    plot_comparison(file, title, output_dir, ColourMode.light)
+    plot_comparison(file, title, output_dir, ColourMode.dark)
 
 
 @plot_app.command()
@@ -76,9 +75,10 @@ def scaling(
         list[Path], Argument(default=..., help="JSON file(s) with benchmark results")
     ],
     title: str | None = Option(default=None, help="Title for plot."),
-    output: list[Path] = Option(default=[], help="Save image to the given filename(s)."),
-    colour_mode: ColourMode = Option(
-        default="light", help="Whether to use light or dark colour mode"
+    output_dir: Path | None = Option(
+        default=None,
+        help="Save images to this directory. If not specified, images will be displayed instead of saved to disk.",
     ),
 ):
-    plot_parameterised(file, title, output, colour_mode)
+    plot_scaling(file, title, output_dir, ColourMode.light)
+    plot_scaling(file, title, output_dir, ColourMode.dark)
